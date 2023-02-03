@@ -2,4 +2,8 @@ namespace Foxite.Text;
 
 public record LiteralText(
 	string Contents
-) : IText;
+) : IText {
+	public virtual bool Equals(IText? other) {
+		return other is LiteralText otherLiteral && Contents == otherLiteral.Contents;
+	}
+}

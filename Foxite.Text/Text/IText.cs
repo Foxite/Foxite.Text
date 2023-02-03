@@ -1,3 +1,3 @@
 namespace Foxite.Text;
 
-public interface IText { }
+public interface IText : IEquatable<IText> { }
