@@ -12,4 +12,9 @@
         <RepositoryType>git</RepositoryType>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Foxite.Common" Version="1.8.2" />
+      <PackageReference Include="Markdig" Version="0.30.4" />
+    </ItemGroup>
+
 </Project>
