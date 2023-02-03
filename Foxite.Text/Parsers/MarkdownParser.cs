@@ -10,12 +10,12 @@ public class MarkdownParser : Parser {
 		return ToIText(document)!;
 	}
 
-	private IText? ToIText(IMarkdownObject mdo) {
+	private IText ToIText(IMarkdownObject mdo) {
 		IText ToComposite(IEnumerable<IMarkdownObject> children) {
 			if (children.Count() == 1) {
 				return ToIText(children.First());
 			} else {
-				return new CompositeText(children.Select(ToIText).WhereNotNull().ToList());
+				return new CompositeText(children.Select(ToIText).ToList());
 			}
 		}
 		
