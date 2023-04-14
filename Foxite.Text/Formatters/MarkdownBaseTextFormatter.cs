@@ -3,9 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Foxite.Text;
 
-public class MarkdownTextFormatter : BaseTextFormatter {
-	private static Regex SanitizeRegex { get; } = new Regex(@"([`\*_~<>\[\]\(\)""@\!\&#:\|])", RegexOptions.ECMAScript);
-	
+public class MarkdownBaseTextFormatter : BaseTextFormatter {
 	protected override void AppendBoldText         (IText text, StringBuilder sb) => sb.Append($"**{Format(text)}**");
 	protected override void AppendItalicText       (IText text, StringBuilder sb) => sb.Append($"*{Format(text)}*");
 	protected override void AppendStrikethroughText(IText text, StringBuilder sb) => sb.Append($"~~{Format(text)}~~");
@@ -16,8 +14,12 @@ public class MarkdownTextFormatter : BaseTextFormatter {
 	}
 
 	protected override void AppendLiteralText(LiteralText literalText, StringBuilder builder) {
-		builder.Append(Sanitize(literalText.Contents));
+		builder.Append(MarkdownUtils.Sanitize(literalText.Contents));
 	}
+}
+
+internal static class MarkdownUtils {
+	private static Regex SanitizeRegex { get; } = new Regex(@"([`\*_~<>\[\]\(\)""@\!\&#:\|])", RegexOptions.ECMAScript);
 	
-	private static string Sanitize(string text) => SanitizeRegex.Replace(text, m => $"\\{m.Groups[1].Value}");
+	public static string Sanitize(string text) => MarkdownUtils.SanitizeRegex.Replace(text, m => $"\\{m.Groups[1].Value}");
 }

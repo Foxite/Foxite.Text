@@ -27,8 +27,11 @@ public abstract class BaseTextFormatter : ITextFormatter {
 
 	protected virtual void AppendCompositeText(CompositeText compositeText, StringBuilder builder) {
 		foreach (IText childText in compositeText.Children) {
-			//FormatInternal(childText, builder);
-			builder.Append(Format(childText));
+			// The following line was originally commented:
+			FormatInternal(childText, builder);
+			// And this line was there instead:
+			//builder.Append(Format(childText));
+			// Tell me if you can figure out why this was
 		}
 	}
 
