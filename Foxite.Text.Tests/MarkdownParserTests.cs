@@ -9,26 +9,35 @@ public class MarkdownParserTests {
 	public void Setup() {
 		m_Parser = new MarkdownParser();
 	}
+	
+	public static object[][] StyleTestCases => new [] {
+		new object[] {      "**Hello**"     , new[] { Style.Bold                                                        } },
+		new object[] {       "*Hello*"      , new[] {              Style.Italic                                         } },
+		new object[] {     "***Hello***"    , new[] { Style.Bold , Style.Italic                                         } },
+		new object[] {      "~~Hello~~"     , new[] {                             Style.Strikethrough                   } },
+		new object[] {    "~~**Hello**~~"   , new[] { Style.Bold                , Style.Strikethrough                   } },
+		new object[] {     "~~*Hello*~~"    , new[] {              Style.Italic , Style.Strikethrough                   } },
+		new object[] {   "~~***Hello***~~"  , new[] { Style.Bold , Style.Italic , Style.Strikethrough                   } },
+		new object[] {      "__Hello__"     , new[] {                                                   Style.Underline } },
+		new object[] {    "__**Hello**__"   , new[] { Style.Bold                                      , Style.Underline } },
+		new object[] {     "__*Hello*__"    , new[] {              Style.Italic                       , Style.Underline } },
+		new object[] {   "__***Hello***__"  , new[] { Style.Bold , Style.Italic                       , Style.Underline } },
+		new object[] {    "__~~Hello~~__"   , new[] {                             Style.Strikethrough , Style.Underline } },
+		new object[] {  "__~~**Hello**~~__" , new[] { Style.Bold                , Style.Strikethrough , Style.Underline } },
+		new object[] {   "__~~*Hello*~~__"  , new[] {              Style.Italic , Style.Strikethrough , Style.Underline } },
+		new object[] { "__~~***Hello***~~__", new[] { Style.Bold , Style.Italic , Style.Strikethrough , Style.Underline } },
+	};
 
 	[Test]
-	public void StyleTests() {
-		Assert.Multiple(() => {
-			Assert.That(m_Parser.Parse(     "**Hello**"     ), Is.EqualTo(new StyledText(Style.Bold                                                       , new LiteralText("Hello"))));
-			Assert.That(m_Parser.Parse(      "*Hello*"      ), Is.EqualTo(new StyledText(             Style.Italic                                        , new LiteralText("Hello"))));
-			Assert.That(m_Parser.Parse(    "***Hello***"    ), Is.EqualTo(new StyledText(Style.Bold | Style.Italic                                        , new LiteralText("Hello"))));
-			// Assert.That(m_Parser.Parse(     "~~Hello~~"     ), Is.EqualTo(new StyledText(                            Style.Strikethrough                  , new LiteralText("Hello"))));
-			// Assert.That(m_Parser.Parse(   "~~**Hello**~~"   ), Is.EqualTo(new StyledText(Style.Bold                | Style.Strikethrough                  , new LiteralText("Hello"))));
-			// Assert.That(m_Parser.Parse(    "~~*Hello*~~"    ), Is.EqualTo(new StyledText(             Style.Italic | Style.Strikethrough                  , new LiteralText("Hello"))));
-			// Assert.That(m_Parser.Parse(  "~~***Hello***~~"  ), Is.EqualTo(new StyledText(Style.Bold | Style.Italic | Style.Strikethrough                  , new LiteralText("Hello"))));
-			Assert.That(m_Parser.Parse(     "__Hello__"     ), Is.EqualTo(new StyledText(                                                  Style.Underline, new LiteralText("Hello"))));
-			Assert.That(m_Parser.Parse(   "__**Hello**__"   ), Is.EqualTo(new StyledText(Style.Bold                                      | Style.Underline, new LiteralText("Hello"))));
-			Assert.That(m_Parser.Parse(    "__*Hello*__"    ), Is.EqualTo(new StyledText(             Style.Italic                       | Style.Underline, new LiteralText("Hello"))));
-			Assert.That(m_Parser.Parse(  "__***Hello***__"  ), Is.EqualTo(new StyledText(Style.Bold | Style.Italic                       | Style.Underline, new LiteralText("Hello"))));
-			// Assert.That(m_Parser.Parse(   "__~~Hello~~__"   ), Is.EqualTo(new StyledText(                            Style.Strikethrough | Style.Underline, new LiteralText("Hello"))));
-			// Assert.That(m_Parser.Parse( "__~~**Hello**~~__" ), Is.EqualTo(new StyledText(Style.Bold                | Style.Strikethrough | Style.Underline, new LiteralText("Hello"))));
-			// Assert.That(m_Parser.Parse(  "__~~*Hello*~~__"  ), Is.EqualTo(new StyledText(             Style.Italic | Style.Strikethrough | Style.Underline, new LiteralText("Hello"))));
-			// Assert.That(m_Parser.Parse("__~~***Hello***~~__"), Is.EqualTo(new StyledText(Style.Bold | Style.Italic | Style.Strikethrough | Style.Underline, new LiteralText("Hello"))));
-		});
+	[TestCaseSource(nameof(StyleTestCases))]
+	public void StyleTests(string expected, Style[] styles) {
+		IText text = new LiteralText("Hello");
+
+		foreach (Style style in styles) {
+			text = new StyledText(style, text);
+		}
+		
+		Assert.That(m_Parser.Parse(expected), Is.EqualTo(text));
 	}
 
 	[Test]

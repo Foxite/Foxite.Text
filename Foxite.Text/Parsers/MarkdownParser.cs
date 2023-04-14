@@ -1,12 +1,25 @@
 using System.Runtime.CompilerServices;
+using Markdig;
+using Markdig.Parsers.Inlines;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
 
 namespace Foxite.Text.Parsers;
 
 public class MarkdownParser : Parser {
+	private readonly MarkdownPipeline m_Pipeline;
+
+	public MarkdownParser(Action<MarkdownPipelineBuilder>? configurePipeline = null) {
+		var pipelineBuilder = new MarkdownPipelineBuilder();
+		pipelineBuilder.InlineParsers.Find<EmphasisInlineParser>()!.EmphasisDescriptors.Add(new EmphasisDescriptor('~', 2, 2, true));
+		
+		configurePipeline?.Invoke(pipelineBuilder);
+
+		m_Pipeline = pipelineBuilder.Build();
+	}
+
 	public override IText Parse(string text) {
-		var document = Markdig.Parsers.MarkdownParser.Parse(text);
+		var document = Markdig.Parsers.MarkdownParser.Parse(text, m_Pipeline);
 		return ToIText(document)!;
 	}
 
@@ -29,14 +42,7 @@ public class MarkdownParser : Parser {
 					'~' => Style.Strikethrough
 				};
 
-				IText inner = ToComposite(emphasisInline);
-
-				while (inner is StyledText styledInner) {
-					style |= styledInner.Style;
-					inner = styledInner.Text;
-				}
-				
-				return new StyledText(style, inner);
+				return new StyledText(style, ToComposite(emphasisInline));
 			case ContainerBlock container:
 				return ToComposite(container);
 			case ContainerInline containerInline:
