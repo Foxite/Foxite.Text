@@ -1,11 +1,13 @@
 namespace Foxite.Text;
 
-public class MarkdownFormatterTests {
-	private MarkdownTextFormatter m_Formatter;
+public abstract class MarkdownFormatterTests {
+	private ITextFormatter m_Formatter;
 
+	protected abstract ITextFormatter GetFormatter();
+	
 	[SetUp]
 	public void Setup() {
-		m_Formatter = new MarkdownTextFormatter();
+		m_Formatter = GetFormatter();
 	}
 
 	public static object[][] StyleTestCases => new[] {
@@ -60,6 +62,19 @@ public class MarkdownFormatterTests {
 			Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello"))), Is.EqualTo("Hello"));
 			Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello"), new LiteralText("Hello"))), Is.EqualTo("HelloHello"));
 			Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello"), new LiteralText("Hello"), new LiteralText("Hello"))), Is.EqualTo("HelloHelloHello"));
+			Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello "), new StyledText(Style.Bold, new LiteralText("Hello")), new LiteralText(" Hello"))), Is.EqualTo("Hello **Hello** Hello"));
 		});
+	}
+}
+
+public class MarkdownBaseTextFormatterTests : MarkdownFormatterTests {
+	protected override ITextFormatter GetFormatter() {
+		return new MarkdownBaseTextFormatter();
+	}
+}
+
+public class MarkdownModularTextFormatterTests : MarkdownFormatterTests {
+	protected override ITextFormatter GetFormatter() {
+		return ModularTextFormatter.Markdown();
 	}
 }
