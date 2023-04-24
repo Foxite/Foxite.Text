@@ -49,6 +49,8 @@ public class MarkdownParser : Parser {
 				return ToComposite(containerInline);
 			case LiteralInline literalInline:
 				return new LiteralText(literalInline.Content.ToString());
+			case LineBreakInline lineBreakInline:
+				return new LiteralText("\n");
 			case ParagraphBlock paragraphBlock:
 				return ToIText(paragraphBlock.Inline!);
 			default:
