@@ -1,13 +1,20 @@
+using NUnit.Framework.Constraints;
+
 namespace Foxite.Text;
 
-public abstract class MarkdownFormatterTests {
+[TestFixtureSource(nameof(GetFixtureParameters))]
+public class MarkdownFormatterTests {
 	private ITextFormatter m_Formatter;
 
-	protected abstract ITextFormatter GetFormatter();
-	
-	[SetUp]
-	public void Setup() {
-		m_Formatter = GetFormatter();
+	public static object[][] GetFixtureParameters() {
+		return new[] {
+			new object[] { new MarkdownBaseTextFormatter() },
+			new object[] { ModularTextFormatter.Markdown() },
+		};
+	}
+
+	public MarkdownFormatterTests(ITextFormatter formatter) {
+		m_Formatter = formatter;
 	}
 
 	public static object[][] StyleTestCases => new[] {
@@ -64,17 +71,5 @@ public abstract class MarkdownFormatterTests {
 			Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello"), new LiteralText("Hello"), new LiteralText("Hello"))), Is.EqualTo("HelloHelloHello"));
 			Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello "), new StyledText(Style.Bold, new LiteralText("Hello")), new LiteralText(" Hello"))), Is.EqualTo("Hello **Hello** Hello"));
 		});
-	}
-}
-
-public class MarkdownBaseTextFormatterTests : MarkdownFormatterTests {
-	protected override ITextFormatter GetFormatter() {
-		return new MarkdownBaseTextFormatter();
-	}
-}
-
-public class MarkdownModularTextFormatterTests : MarkdownFormatterTests {
-	protected override ITextFormatter GetFormatter() {
-		return ModularTextFormatter.Markdown();
 	}
 }
