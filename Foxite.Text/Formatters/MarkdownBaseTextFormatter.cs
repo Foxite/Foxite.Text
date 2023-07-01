@@ -21,7 +21,7 @@ public class MarkdownBaseTextFormatter : BaseTextFormatter {
 	protected override void AppendListText(ListText listText, StringBuilder builder) {
 		int i = 1;
 		foreach (IText item in listText.Items) {
-			if (i != 1) {
+			if (i != 1 || (builder.Length > 0 && builder[^1] != '\n')) {
 				builder.Append('\n');
 			}
 			

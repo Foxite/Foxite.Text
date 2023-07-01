@@ -51,7 +51,7 @@ public partial class ModularTextFormatter {
 		protected override void AppendFormattedText(ListText listText, StringBuilder builder) {
 			int i = 1;
 			foreach (IText item in listText.Items) {
-				if (i != 1) {
+				if (i != 1 || (builder.Length > 0 && builder[^1] != '\n')) {
 					builder.Append('\n');
 				}
 			

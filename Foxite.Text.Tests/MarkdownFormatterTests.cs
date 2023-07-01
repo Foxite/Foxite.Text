@@ -82,4 +82,19 @@ public class MarkdownFormatterTests {
 			Assert.That(m_Formatter.Format(new ListText(true, new LiteralText("Hello"), new LiteralText("My name is"))), Is.EqualTo("1. Hello\n2. My name is"));
 		});
 	}
+
+	[Test]
+	public void ListAfterLiteralTests() {
+        Assert.Multiple(() => {
+            Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello"), new ListText(false, new LiteralText("Hello")))), Is.EqualTo("Hello\n- Hello"));
+            Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello"), new ListText(false, new LiteralText("Hello"), new LiteralText("My name is")))), Is.EqualTo("Hello\n- Hello\n- My name is"));
+            Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello"), new ListText(true, new LiteralText("Hello")))), Is.EqualTo("Hello\n1. Hello"));
+            Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello"), new ListText(true, new LiteralText("Hello"), new LiteralText("My name is")))), Is.EqualTo("Hello\n1. Hello\n2. My name is"));
+            
+            Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello\n"), new ListText(false, new LiteralText("Hello")))), Is.EqualTo("Hello\n- Hello"));
+            Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello\n"), new ListText(false, new LiteralText("Hello"), new LiteralText("My name is")))), Is.EqualTo("Hello\n- Hello\n- My name is"));
+            Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello\n"), new ListText(true, new LiteralText("Hello")))), Is.EqualTo("Hello\n1. Hello"));
+            Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello\n"), new ListText(true, new LiteralText("Hello"), new LiteralText("My name is")))), Is.EqualTo("Hello\n1. Hello\n2. My name is"));
+        });
+    }
 }
