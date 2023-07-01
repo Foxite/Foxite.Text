@@ -43,6 +43,8 @@ public class MarkdownParser : Parser {
 				};
 
 				return new StyledText(style, ToComposite(emphasisInline));
+			case ListBlock listBlock:
+				return new ListText(listBlock.IsOrdered, listBlock.Select(ToIText).ToList());
 			case ContainerBlock container:
 				return ToComposite(container);
 			case ContainerInline containerInline:
