@@ -1,9 +1,12 @@
 using Foxite.Text.Parsers;
+using NUnit.Framework.Constraints;
 
 namespace Foxite.Text; 
 
 public class MarkdownParserTests {
 	private MarkdownParser m_Parser;
+
+	private static EqualConstraint IsEqualText(IText expected) => Is.EqualTo(expected).Using((IEqualityComparer<IText>) EqualityComparer<IText>.Default);
 
 	[SetUp]
 	public void Setup() {
@@ -37,7 +40,7 @@ public class MarkdownParserTests {
 			text = new StyledText(style, text);
 		}
 		
-		Assert.That(m_Parser.Parse(expected), Is.EqualTo(text));
+		Assert.That(m_Parser.Parse(expected), IsEqualText(text));
 	}
 
 	[Test]
@@ -47,12 +50,26 @@ public class MarkdownParserTests {
 			Assert.That(new Uri("https://github.com/").ToString(), Is.EqualTo("https://github.com/"));
 			Assert.That(new Uri("https://github.com" ).ToString(), Is.EqualTo("https://github.com/"));
 
-			Assert.That(m_Parser.Parse("[Hello](https://github.com/)"), Is.EqualTo(new LinkText(new Uri("https://github.com/"), new LiteralText("Hello"))));
+			Assert.That(m_Parser.Parse("[Hello](https://github.com/)"), IsEqualText(new LinkText(new Uri("https://github.com/"), new LiteralText("Hello"))));
 		});
 	}
 
 	[Test]
 	public void LiteralTests() {
-		Assert.That(m_Parser.Parse("Hello"), Is.EqualTo(new LiteralText("Hello")));
+		Assert.That(m_Parser.Parse("Hello"), IsEqualText(new LiteralText("Hello")));
 	}
+	
+	[Test]
+	public void CompositeTests() {
+		Assert.That(m_Parser.Parse("Hello **Hello** Hello"), IsEqualText(new CompositeText(new LiteralText("Hello "), new StyledText(Style.Bold, new LiteralText("Hello")), new LiteralText(" Hello"))));
+	}
+
+	[Test]
+	public void ListTests() {
+        Assert.Multiple(() => {
+            Assert.That(m_Parser.Parse("- Hello\n- My name is"), IsEqualText(new ListText(false, new LiteralText("Hello"), new LiteralText("My name is"))));
+            Assert.That(m_Parser.Parse("* Hello\n* My name is"), IsEqualText(new ListText(false, new LiteralText("Hello"), new LiteralText("My name is"))));
+            Assert.That(m_Parser.Parse("1. Hello\n2. My name is"), IsEqualText(new ListText(true, new LiteralText("Hello"), new LiteralText("My name is"))));
+        });
+    }
 }
