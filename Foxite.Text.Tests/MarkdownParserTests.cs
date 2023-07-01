@@ -6,8 +6,6 @@ namespace Foxite.Text;
 public class MarkdownParserTests {
 	private MarkdownParser m_Parser;
 
-	private static EqualConstraint IsEqualText(IText expected) => Is.EqualTo(expected).Using((IEqualityComparer<IText>) EqualityComparer<IText>.Default);
-
 	[SetUp]
 	public void Setup() {
 		m_Parser = new MarkdownParser();
@@ -40,7 +38,7 @@ public class MarkdownParserTests {
 			text = new StyledText(style, text);
 		}
 		
-		Assert.That(m_Parser.Parse(expected), IsEqualText(text));
+		Assert.That(m_Parser.Parse(expected), Util.IsEqualText(text));
 	}
 
 	[Test]
@@ -50,26 +48,26 @@ public class MarkdownParserTests {
 			Assert.That(new Uri("https://github.com/").ToString(), Is.EqualTo("https://github.com/"));
 			Assert.That(new Uri("https://github.com" ).ToString(), Is.EqualTo("https://github.com/"));
 
-			Assert.That(m_Parser.Parse("[Hello](https://github.com/)"), IsEqualText(new LinkText(new Uri("https://github.com/"), new LiteralText("Hello"))));
+			Assert.That(m_Parser.Parse("[Hello](https://github.com/)"), Util.IsEqualText(new LinkText(new Uri("https://github.com/"), new LiteralText("Hello"))));
 		});
 	}
 
 	[Test]
 	public void LiteralTests() {
-		Assert.That(m_Parser.Parse("Hello"), IsEqualText(new LiteralText("Hello")));
+		Assert.That(m_Parser.Parse("Hello"), Util.IsEqualText(new LiteralText("Hello")));
 	}
 	
 	[Test]
 	public void CompositeTests() {
-		Assert.That(m_Parser.Parse("Hello **Hello** Hello"), IsEqualText(new CompositeText(new LiteralText("Hello "), new StyledText(Style.Bold, new LiteralText("Hello")), new LiteralText(" Hello"))));
+		Assert.That(m_Parser.Parse("Hello **Hello** Hello"), Util.IsEqualText(new CompositeText(new LiteralText("Hello "), new StyledText(Style.Bold, new LiteralText("Hello")), new LiteralText(" Hello"))));
 	}
 
 	[Test]
 	public void ListTests() {
         Assert.Multiple(() => {
-            Assert.That(m_Parser.Parse("- Hello\n- My name is"), IsEqualText(new ListText(false, new LiteralText("Hello"), new LiteralText("My name is"))));
-            Assert.That(m_Parser.Parse("* Hello\n* My name is"), IsEqualText(new ListText(false, new LiteralText("Hello"), new LiteralText("My name is"))));
-            Assert.That(m_Parser.Parse("1. Hello\n2. My name is"), IsEqualText(new ListText(true, new LiteralText("Hello"), new LiteralText("My name is"))));
+            Assert.That(m_Parser.Parse("- Hello\n- My name is"), Util.IsEqualText(new ListText(false, new LiteralText("Hello"), new LiteralText("My name is"))));
+            Assert.That(m_Parser.Parse("* Hello\n* My name is"), Util.IsEqualText(new ListText(false, new LiteralText("Hello"), new LiteralText("My name is"))));
+            Assert.That(m_Parser.Parse("1. Hello\n2. My name is"), Util.IsEqualText(new ListText(true, new LiteralText("Hello"), new LiteralText("My name is"))));
         });
     }
 }

@@ -17,4 +17,23 @@ public class ListText : IText {
 	public override string ToString() {
 		return $"ListText(IsNumbered = {IsNumbered} ) {{ {string.Join(", ", Items)} }}";
 	}
+	
+	public void Visit(IText.Visitor visitor) {
+		foreach (IText child in Items) {
+			visitor(this, child);
+			child.Visit(visitor);
+		}
+	}
+	
+	public void VisitReplace(IText.ReplaceVisitor visitor) {
+		for (int i = Items.Count - 1; i >= 0; i--) {
+			IText? replacement = visitor(this, Items[i]);
+			if (replacement == null) {
+				Items.RemoveAt(i);
+			} else {
+				Items[i] = replacement;
+				Items[i].VisitReplace(visitor);
+			}
+		}
+	}
 }

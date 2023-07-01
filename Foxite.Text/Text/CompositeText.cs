@@ -15,4 +15,23 @@ public class CompositeText : IText {
 	public override string ToString() {
 		return $"CompositeText {{ {string.Join(", ", Children)} }}";
 	}
+	
+	public void Visit(IText.Visitor visitor) {
+		foreach (IText child in Children) {
+			visitor(this, child);
+			child.Visit(visitor);
+		}
+	}
+	
+	public void VisitReplace(IText.ReplaceVisitor visitor) {
+		for (int i = Children.Count - 1; i >= 0; i--) {
+			IText? replacement = visitor(this, Children[i]);
+			if (replacement == null) {
+				Children.RemoveAt(i);
+			} else {
+				Children[i] = replacement;
+				Children[i].VisitReplace(visitor);
+			}
+		}
+	}
 }

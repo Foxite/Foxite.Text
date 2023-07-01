@@ -12,4 +12,13 @@ public class LinkText : IText {
 	public virtual bool Equals(IText? other) {
 		return other is LinkText otherLink && Uri.Equals(otherLink.Uri) && Text.Equals(otherLink.Text);
 	}
+
+	public void Visit(IText.Visitor visitor) {
+		visitor(this, Text);
+		Text.Visit(visitor);
+	}
+
+	public void VisitReplace(IText.ReplaceVisitor visitor) {
+		Text = visitor(this, Text) ?? throw new InvalidOperationException("Cannot remove the child Text of a LinkText");
+	}
 }
