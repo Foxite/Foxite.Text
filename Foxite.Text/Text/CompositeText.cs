@@ -1,10 +1,13 @@
 namespace Foxite.Text;
 
-public record CompositeText(
-	IReadOnlyList<IText> Children
-) : IText {
-	public CompositeText(params IText[] children) : this((IReadOnlyList<IText>) children) { }
+public class CompositeText : IText {
+	public IList<IText> Children { get; }
 	
+	public CompositeText(params IText[] children) : this((IList<IText>) children) { }
+	public CompositeText(IList<IText> children) {
+		this.Children = children;
+	}
+
 	public virtual bool Equals(IText? other) {
 		return other is CompositeText otherComposite && Children.SequenceEqual(otherComposite.Children);
 	}
