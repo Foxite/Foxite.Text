@@ -18,6 +18,8 @@ public abstract class BaseTextFormatter : ITextFormatter {
 			AppendLinkText(link, builder);
 		} else if (text is LiteralText literal) {
 			AppendLiteralText(literal, builder);
+		} else if (text is ListText list) {
+			AppendListText(list, builder);
 		} else {
 			AppendUnknownText(text, builder);
 		}
@@ -34,6 +36,8 @@ public abstract class BaseTextFormatter : ITextFormatter {
 			// Tell me if you can figure out why this was
 		}
 	}
+
+	protected abstract void AppendListText(ListText listText, StringBuilder builder);
 
 	protected virtual void AppendStyledText(StyledText styledText, StringBuilder builder) {
 #pragma warning disable CS8524
