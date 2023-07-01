@@ -9,6 +9,7 @@ public partial class ModularTextFormatter {
 		ret.AddTypeFormatter(new MarkdownLiteralTextFormatter());
 		ret.AddTypeFormatter(new MarkdownStyledTextFormatter());
 		ret.AddTypeFormatter(new MarkdownLinkTextFormatter());
+		ret.AddTypeFormatter(new MarkdownListTextFormatter());
 
 		return ret;
 	}
@@ -43,6 +44,27 @@ public partial class ModularTextFormatter {
 			builder.Append("](");
 			builder.Append(text.Uri);
 			builder.Append(')');
+		}
+	}
+
+	private class MarkdownListTextFormatter : TypeFormatter<ListText> {
+		protected override void AppendFormattedText(ListText listText, StringBuilder builder) {
+			int i = 1;
+			foreach (IText item in listText.Items) {
+				if (i != 1) {
+					builder.Append('\n');
+				}
+			
+				if (listText.IsNumbered) {
+					builder.Append($"{i}. ");
+				} else {
+					builder.Append("- ");
+				}
+			
+				AppendRecursive(item, builder);
+				
+				i++;
+			}
 		}
 	}
 }
