@@ -64,6 +64,24 @@ public class MarkdownFormatterTests {
 	}
 
 	[Test]
+	public void SanitizeTests() {
+		Assert.Multiple(() => {
+			Assert.That(m_Formatter.Format(new LiteralText("*Hello*")), Is.EqualTo(@"\*Hello\*"));
+			
+			Assert.That(m_Formatter.Format(new LiteralText("(Hello)")), Is.EqualTo(@"(Hello)"));
+			Assert.That(m_Formatter.Format(new LiteralText("[Hello]")), Is.EqualTo(@"[Hello]"));
+			
+			Assert.That(m_Formatter.Format(new LinkText(new Uri("https://github.com/hello"), new LiteralText("Hello"))), Is.EqualTo(@"[Hello](https://github.com/hello)"));
+			
+			Assert.That(m_Formatter.Format(new LinkText(new Uri("https://github.com/hello"), new LiteralText("(Hello)"))), Is.EqualTo(@"[(Hello)](https://github.com/hello)"));
+			Assert.That(m_Formatter.Format(new LinkText(new Uri("https://github.com/hello"), new LiteralText("[Hello]"))), Is.EqualTo(@"[\[Hello\]](https://github.com/hello)"));
+			
+			Assert.That(m_Formatter.Format(new LinkText(new Uri("https://github.com/hello_[hi]"), new LiteralText("Hello"))), Is.EqualTo(@"[Hello](https://github.com/hello_[hi])"));
+			Assert.That(m_Formatter.Format(new LinkText(new Uri("https://github.com/hello_(hi)"), new LiteralText("Hello"))), Is.EqualTo(@"[Hello](https://github.com/hello_\(hi\))"));
+		});
+	}
+
+	[Test]
 	public void CompositeTests() {
 		Assert.Multiple(() => {
 			Assert.That(m_Formatter.Format(new CompositeText(new LiteralText("Hello"))), Is.EqualTo("Hello"));

@@ -15,13 +15,13 @@ public partial class ModularTextFormatter {
 	}
 
 	private class MarkdownLiteralTextFormatter : TypeFormatter<LiteralText> {
-		protected override void AppendFormattedText(LiteralText text, StringBuilder builder) {
-			builder.Append(MarkdownUtils.Sanitize(text.Contents));
+		protected override void AppendFormattedText(LiteralText text, StringBuilder builder, Stack<string> formatStack) {
+			builder.Append(MarkdownUtils.Sanitize(text.Contents, formatStack));
 		}
 	}
 
 	private class MarkdownStyledTextFormatter : TypeFormatter<StyledText> {
-		protected override void AppendFormattedText(StyledText text, StringBuilder builder) {
+		protected override void AppendFormattedText(StyledText text, StringBuilder builder, Stack<string> formatStack) {
 #pragma warning disable CS8524
 			string delimiter = text.Style switch {
 #pragma warning restore CS8524
@@ -32,23 +32,31 @@ public partial class ModularTextFormatter {
 			};
 
 			builder.Append(delimiter);
-			AppendRecursive(text.Text, builder);
+			AppendRecursive(text.Text, builder, formatStack);
 			builder.Append(delimiter);
 		}
 	}
 
 	private class MarkdownLinkTextFormatter : TypeFormatter<LinkText> {
-		protected override void AppendFormattedText(LinkText text, StringBuilder builder) {
+		protected override void AppendFormattedText(LinkText link, StringBuilder builder, Stack<string> formatStack) {
 			builder.Append('[');
-			AppendRecursive(text.Text, builder);
+		
+			formatStack.Push(MarkdownUtils.StackLinkTextFormat);
+			AppendRecursive(link.Text, builder, formatStack);
+			formatStack.Pop();
+		
 			builder.Append("](");
-			builder.Append(text.Uri);
+		
+			formatStack.Push(MarkdownUtils.StackLinkUrlFormat);
+			builder.Append(MarkdownUtils.Sanitize(link.Uri.ToString(), formatStack));
+			formatStack.Pop();
+
 			builder.Append(')');
 		}
 	}
 
 	private class MarkdownListTextFormatter : TypeFormatter<ListText> {
-		protected override void AppendFormattedText(ListText listText, StringBuilder builder) {
+		protected override void AppendFormattedText(ListText listText, StringBuilder builder, Stack<string> formatStack) {
 			int i = 1;
 			foreach (IText item in listText.Items) {
 				if (i != 1 || (builder.Length > 0 && builder[^1] != '\n')) {
@@ -61,7 +69,7 @@ public partial class ModularTextFormatter {
 					builder.Append("- ");
 				}
 			
-				AppendRecursive(item, builder);
+				AppendRecursive(item, builder, formatStack);
 				
 				i++;
 			}

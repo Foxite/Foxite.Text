@@ -2,46 +2,47 @@ using System.Text;
 
 namespace Foxite.Text; 
 
+[Obsolete("Use " + nameof(ModularTextFormatter))]
 public abstract class BaseTextFormatter : ITextFormatter {
 	public string Format(IText text) {
 		var sb = new StringBuilder();
-		FormatInternal(text, sb);
+		AppendText(text, sb, new Stack<string>());
 		return sb.ToString();
 	}
 
-	private void FormatInternal(IText text, StringBuilder builder) {
+	protected void AppendText(IText text, StringBuilder builder, Stack<string> formatStack) {
 		if (text is CompositeText composite) {
-			AppendCompositeText(composite, builder);
+			AppendCompositeText(composite, builder, formatStack);
 		} else if (text is StyledText styled) {
-			AppendStyledText(styled, builder);
+			AppendStyledText(styled, builder, formatStack);
 		} else if (text is LinkText link) {
-			AppendLinkText(link, builder);
+			AppendLinkText(link, builder, formatStack);
 		} else if (text is LiteralText literal) {
-			AppendLiteralText(literal, builder);
+			AppendLiteralText(literal, builder, formatStack);
 		} else if (text is ListText list) {
-			AppendListText(list, builder);
+			AppendListText(list, builder, formatStack);
 		} else {
-			AppendUnknownText(text, builder);
+			AppendUnknownText(text, builder, formatStack);
 		}
 	}
 
-	protected abstract void AppendLinkText(LinkText linkText, StringBuilder builder);
+	protected abstract void AppendLinkText(LinkText linkText, StringBuilder builder, Stack<string> formatStack);
 
-	protected virtual void AppendCompositeText(CompositeText compositeText, StringBuilder builder) {
+	protected virtual void AppendCompositeText(CompositeText compositeText, StringBuilder builder, Stack<string> formatStack) {
 		foreach (IText childText in compositeText.Children) {
 			// The following line was originally commented:
-			FormatInternal(childText, builder);
+			AppendText(childText, builder, formatStack);
 			// And this line was there instead:
 			//builder.Append(Format(childText));
 			// Tell me if you can figure out why this was
 		}
 	}
 
-	protected abstract void AppendListText(ListText listText, StringBuilder builder);
+	protected abstract void AppendListText(ListText listText, StringBuilder builder, Stack<string> formatStack);
 
-	protected virtual void AppendStyledText(StyledText styledText, StringBuilder builder) {
+	protected virtual void AppendStyledText(StyledText styledText, StringBuilder builder, Stack<string> formatStack) {
 #pragma warning disable CS8524
-		Action<IText, StringBuilder> func = styledText.Style switch {
+		Action<IText, StringBuilder, Stack<string>> func = styledText.Style switch {
 #pragma warning restore CS8524
 			Style.Bold => AppendBoldText,
 			Style.Italic => AppendItalicText,
@@ -49,19 +50,19 @@ public abstract class BaseTextFormatter : ITextFormatter {
 			Style.Underline => AppendUnderlineText,
 		};
 
-		func(styledText.Text, builder);
+		func(styledText.Text, builder, formatStack);
 	}
 	
-	protected abstract void AppendBoldText(IText inner, StringBuilder builder);
-	protected abstract void AppendItalicText(IText inner, StringBuilder builder);
-	protected abstract void AppendStrikethroughText(IText inner, StringBuilder builder);
-	protected abstract void AppendUnderlineText(IText inner, StringBuilder builder);
+	protected abstract void AppendBoldText(IText inner, StringBuilder builder, Stack<string> formatStack);
+	protected abstract void AppendItalicText(IText inner, StringBuilder builder, Stack<string> formatStack);
+	protected abstract void AppendStrikethroughText(IText inner, StringBuilder builder, Stack<string> formatStack);
+	protected abstract void AppendUnderlineText(IText inner, StringBuilder builder, Stack<string> formatStack);
 
-	protected virtual void AppendLiteralText(LiteralText literalText, StringBuilder builder) {
+	protected virtual void AppendLiteralText(LiteralText literalText, StringBuilder builder, Stack<string> formatStack) {
 		builder.Append(literalText.Contents);
 	}
 
-	protected virtual void AppendUnknownText(IText text, StringBuilder builder) {
+	protected virtual void AppendUnknownText(IText text, StringBuilder builder, Stack<string> formatStack) {
 		throw new UnknownTextException(text);
 	}
 }
